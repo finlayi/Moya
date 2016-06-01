@@ -73,7 +73,7 @@ extension TargetType {
     }
     
     private var isMultipartUpload: Bool {
-        return method == .POST && (multipartBody?.count ?? 0) > 0
+        return (method == .POST || method == .PUT) && (multipartBody?.count ?? 0) > 0
     }
 }
 
@@ -334,8 +334,6 @@ internal extension MoyaProvider {
         let plugins = self.plugins
         
         let multipartFormData = { (form:RequestMultipartFormData) -> Void in
-            let params = decodeHTTPBody(request.HTTPBody)
-            
             for bodyPart in multipartBody {
                 switch bodyPart.provider {
                 case .Data(let data):
@@ -347,9 +345,12 @@ internal extension MoyaProvider {
                 }
             }
             
-            // Add old url request body to new one
-            for (key, value) in params {
-                form.appendBodyPart(data: value.dataUsingEncoding(NSUTF8StringEncoding)!, name: key)
+            if let parameters = target.parameters {
+                parameters
+                    .flatMap{ (key, value) in ParameterEncoding.URL.queryComponents(key, value) }
+                    .forEach{ (key, value) in
+                        form.appendBodyPart(data: value.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!, name: key)
+                    }
             }
         }
         
