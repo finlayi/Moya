@@ -457,22 +457,3 @@ internal struct CancellableWrapper: Cancellable {
         innerCancellable?.cancel()
     }
 }
-
-internal func decodeHTTPBody(nsData:NSData?) -> [String:String] {
-    guard let data = nsData, let urlParams = String(data: data, encoding: NSUTF8StringEncoding)
-        else { return [:] }
-    
-    var params = [String:String]()
-    for entry in urlParams.componentsSeparatedByString("&") {
-        if entry.containsString("=") {
-            let comp = entry.componentsSeparatedByString("=")
-            if let key = comp.first, let value = comp.last {
-                params[key] = value
-            }
-        } else {
-            params[entry] = ""
-        }
-    }
-    
-    return params
-}
