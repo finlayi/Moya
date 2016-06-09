@@ -349,6 +349,8 @@ internal extension MoyaProvider {
                 parameters
                     .flatMap{ (key, value) in ParameterEncoding.URL.queryComponents(key, value) }
                     .forEach{ (key, value) in
+                        let key = key.stringByReplacingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+                        let value = value.stringByReplacingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
                         form.appendBodyPart(data: value.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!, name: key)
                     }
             }
